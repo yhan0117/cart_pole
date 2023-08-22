@@ -1,23 +1,22 @@
-function [K, S] = LQR(p)
-    %%%% Unpack the physical palametels
+function [K,S] = LQR(p,c)
+    
+    % unpack the physical parameters
     l = p.l;  % Pendulum length
-    M = p.M; % Cart mass
-    m = p.m; % Pole mass
+    M = p.m1; % Cart mass
+    m = p.m2; % Pole mass
     g = p.g;  % Gravity acceleration
 
-    %%%% linearized model
+    % unpack control parameters
+    Q = c.Q;
+    R = c.R;
+
+    % jacobian about upward eq    
     A = [0 0            1  0;
          0 0            0  1;
          0 m*g/M        0  0;
          0 (m+M)*g/l/M  0  0];
     B = [0 0 1/M 1/M/l].';
 
-    %%%% cost matrices
-    Q = diag([0.06,10,1,2]);
 
-    R = 1;
-
-    %%%% calculate optimal gains
-    [K, S] = lqr(A,B,Q,R);
+    [K,S] = lqr(A,B,Q,R);
 end
-

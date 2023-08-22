@@ -1,17 +1,13 @@
 clc; clear; clear global; close all;
 % TODO
-% tuning     -> non uniform weight for each time step?
 % robustness -> change first initial guess, multistart, prove recursive robustness 
 % speed      -> analytical hessian, orthogonal collocation
 % reference  -> track pendulum position => change cost function
-% test       -> swing up with uncertainty
+% test       -> swing up, tracking with normally distributedmuncertainty 
 
-trials = ["11_1","20","21","22"];
-uuu = [0,0.1,0.1,0.1];
-for i = 1
 %% Constants
 %%%% Initial States
-trial = trials(i);
+trial = 1;
 z0 = [0.0;          % cart position
       (pi/180)*179.9;   % pendulum angle (wrt gravity)
       0.0;          % cart velocity
@@ -43,7 +39,7 @@ c.dt_p = t_pred/N;      % prediction step size
 
 % external disturbance @ t = 3sec
 c.t_d = 0.15;  % impact time duration
-c.ui = uuu(i);    % impact magnitude
+c.ui = 0;    % impact magnitude
 
 % uncertainty
 c.std = 0.0;
@@ -55,23 +51,10 @@ options = optimoptions('fmincon','TolX', 1e-9, 'TolFun', 1e-9, 'TolCon', 1e-9, '
 
 
 %%%% Cost weighing factor
-% non uniform weight for each step
-
-% trajectory tracking given states
+% trajectory tracking
 % c.T = 1+(1.2*(0:N-1)/N).^16;        % weight for each break point
 % c.Q = diag([eps 100.0 eps eps]);
 % c.R = 0.06;                          % actuation effort
-
-% trajectory tracking given pendulum position
-c.w = @(i) 1+(1.08*(i)/N).^100;
-c.T = c.w(0:N-1);
-c.Q = diag([20 8 0.7 0.7]);
-c.R = 0.06;     
-
-% stabilization
-% c.T = 7.0*diag([1.1 1.3 0.8 0.8]);
-% c.Q = 7.0*diag([1.5 1.5 0.8 0.6]);
-% c.R = 0.06;
 
 % swing up
 % c.T = repmat(1.3,1,N);
@@ -79,9 +62,8 @@ c.R = 0.06;
 % c.Q = diag([1 1 1 1]);
 % c.R = 0.08;
 
-
 %%%% feedback controller u = f(t,z)
-u = @(t,z)controlLaw(t,z,p,c,options);
+u = @(t,z)control(t,z,p,c,options);
 
 %% Simulation Parameters
 record = 1; r.record = record;
@@ -151,13 +133,4 @@ disp("Done!!")
 close all
 
 
-%%
-%{
-    1-2     swing up
-    3-4     near top 
-    5-7     impulse response
-    8-10    impulse response with uncertainty
-    11-13   sin/square/position references
-    14-16   swing up with uncertainty
-%}
-end
+

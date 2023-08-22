@@ -1,8 +1,8 @@
 function dz = eom(z,u,p)
     %%%% unpack parameters
     l = p.l;    % pendulum length
-    M = p.M;    % cart mass
-    m = p.m;    % pole mass
+    M = p.m1;    % cart mass
+    m = p.m2;    % pole mass
     g = p.g;    % gravity 
 
     %%%% equations of motion

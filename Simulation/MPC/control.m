@@ -1,4 +1,4 @@
-function [dv_o,output] = controlLaw(t,z,p,c,opt)
+function [dv_o,output] = control(t,z,p,c,opt)
 
     %%%%
     % This function represents the control law that computes the input
@@ -56,9 +56,7 @@ function [dv_o,output] = controlLaw(t,z,p,c,opt)
     % nonlincon is appended to Lagrangian as part of objective function 
     % => may not be satisfied 
     % => add weight (which indirectly adds to cost) to make more siginificant
-    [dv_o,~,~,output] = fmincon(@(dv) trajCost(dv,t,c,p),...
-        dv0,[],[],Aeq,beq,lb,ub,...
-       @(dv) collocationCon(dv,p,c), opt);
+    [dv_o,~,~,output] = fmincon(@(dv) trajCost(dv,t,c,p),dv0,[],[],Aeq,beq,lb,ub,@(dv) collocationCon(dv,p,c), opt);
 
 end
 
