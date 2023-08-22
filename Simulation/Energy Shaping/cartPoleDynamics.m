@@ -1,25 +1,34 @@
+% This function computes the state derivates of the cart-pole. The
+% cart rolls along horizontal rails. There is no friction in the system.
+% Both the cart and the pole (pendulum) are point masses.
 function dz = cartPoleDynamics(t,z,c,u,p)
 
-    % This function computes the state derivates of the cart-pole. The
-    % cart rolls along horizontal rails. There is no friction in the system.
-    % Both the cart and the pole (pendulum) are point masses.
-    %
     % INPUTS:
+    %   t = simulation time 
     %   z = [x;q;dx;dq] = state of the system
+    %   u = feedback control law
     %   p = parameter struct
-    % 
+    %       .l  = pendulum length
+    %       .m1 = cart mass
+    %       .m2 = pendulum mass
+    %       .g  = gravity
+    %       .L  = rail length
+    %       .s  = max input force (motor torque*radius)
+    %       .l_un  = pendulum length with uncertainty
+    %       .m1_un = cart mass with uncertainty
+    %       .m2_un = pendulum mass with uncertainty
+    %
     % OUTPUTS:
     %   dz = dz/dt = time derivative of state
-    %
 
-    % global loop time and decision variables
-    global u_prev t_prev z_prev
+    % global loop time 
+    global u_prev t_prev acc
 
     % extract actual states from z and dv
     z = z(1:4);
     
-    % control law
-    if t-t_prev > c.dt_p % end of a control loop
+    % calculate control law
+    if t-t_prev > c.dt_p % wait until next control loop
         u = u(t,z);
         u_prev = u;
         t_prev = t;
@@ -38,5 +47,27 @@ function dz = cartPoleDynamics(t,z,c,u,p)
     else    
         dz = [eom(z,u,p);u];
     end
-    z_prev = dz(4);
+
+    % get acceleration for control
+    acc = dz(4);
+end
+
+% Equations of motion to plug in Runge Kutta solver
+function dz = eom(z,u,p)
+    
+    % unpack parameters (uncertainty included)
+    l = p.l_un;     % pendulum length
+    M = p.m1_un;    % cart mass
+    m = p.m2_un;    % pole mass
+    g = p.g;        % gravity 
+    
+    % initialize
+    dz = zeros(4,1);
+
+    % z' = f(z,u)
+    delta = m*sin(z(2))^2 + M;
+	dz(1) = z(3);
+	dz(2) = z(4);
+	dz(3) = m*l*(z(4)^2)*sin(z(2))/delta + m*l*g*sin(z(2))*cos(z(2))/delta/l + u/delta;
+	dz(4) = -m*(z(4)^2)*sin(z(2))*cos(z(2))/delta - (m+M)*g*sin(z(2))/delta/l - u*cos(z(2))/delta/l;
 end

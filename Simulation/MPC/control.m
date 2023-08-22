@@ -1,31 +1,31 @@
+% This function represents the control law that computes the input
+% based on full state feedback
 function [dv_o,output] = control(t,z,p,c,opt)
 
-    %%%%
-    % This function represents the control law that computes the input
-    % based on full state feedback
-    %
     % INPUTS:
+    %   t = simulation time
     %   z = [x;q;dx;dq] = state of the system
     %   p = parameter struct
-    %       .g  = gravity
-    %       .m1 = cart mass
-    %       .m2 = pole mass
     %       .l  = pendulum length
+    %       .m1 = cart mass
+    %       .m2 = pendulum mass
+    %       .g  = gravity
     %       .L  = rail length
-    %       .s  = max input force
+    %       .s  = max input force (motor torque*radius)
+    %       .l_un  = pendulum length with uncertainty
+    %       .m1_un = cart mass with uncertainty
+    %       .m2_un = pendulum mass with uncertainty
     %   c = control parameter struct
-    %       .z_t = target state
-    %       .rho = terminal cost
-    %       .Q   = error cost matrix
-    %       .R   = actuation effort cost matrix
-    %       .N   = control horizon 
-    %       .t_c = control/ prediction time stamps
-    %   opt = ode and optimziation solver options
-    %       .ODE = options for ode45 
-    %       .NLP = options for fmincon
+    %       .N = prediction horizon
+    %       .t_pred = prediction time span
+    %       .dt_p = prediction step size
+    %       .T = weight for each break point
+    %       .Q = error cost
+    %       .R = actuation effort  
+    %   opt = optimziation solver options
     %
     % OUTPUTS:
-    %   u = u(z) = input as function of current states
+    %   u = u(t,z) = input as function of current states
 
     % control horizon     
     N = c.N;        

@@ -1,17 +1,31 @@
 % Direct collocation as nonlincon to enforce dynamic constraints
 function [c, ceq, dc, dceq] = collocationCon(dv,p,c)
     
-%%%% INPUT
-    % dv: decision variable vector
-    % c: control parameter struct
-    % p: physical parameter struct
-
-    %%%% OUTPUT
-    % ceq: 
-    % collocation constraint, 4(N-1) x 1  => midpoint of cubic spline
-    % must match equations of motion, only accurate over small intervals
-    %     
-    % dceq: jacobian of ceq wrt decision vars; 4(N-1) x 5N
+    % INPUTS:
+    %   dv = decision variable vector with first 4N corresponding to states, 5N x 1
+    %   p = parameter struct
+    %       .l  = pendulum length
+    %       .m1 = cart mass
+    %       .m2 = pendulum mass
+    %       .g  = gravity
+    %       .L  = rail length
+    %       .s  = max input force (motor torque*radius)
+    %       .l_un  = pendulum length with uncertainty
+    %       .m1_un = cart mass with uncertainty
+    %       .m2_un = pendulum mass with uncertainty
+    %   c = control parameter struct
+    %       .N = prediction horizon
+    %       .t_pred = prediction time span
+    %       .dt_p = prediction step size
+    %       .T = weight for each break point
+    %       .Q = error cost
+    %       .R = actuation effort  
+    % 
+    % OUTPUTS:
+    % ceq = collocation constraint, 4(N-1) x 1  
+    %       => midpoint of cubic spline must match equations of motion
+    %          only accurate over small intervals
+    % dceq = jacobian of ceq wrt decision vars; 4(N-1) x 5N
 
     % control parameters
     dt = c.dt_p;    % prediction time interval
@@ -81,4 +95,24 @@ function ceq = collocationPoints(z1,z2,u1,u2,dt,p)
     % dynamics at collocation point must fit into cubic spline
     % with linear interpolation between successive control inputs
     ceq = eom(zc, (u1+u2)/2, p) - dzc;
+end
+
+% Equations of motion to plug in Runge Kutta solver
+function dz = eom(z,u,p)
+    
+    % unpack parameters (uncertainty included)
+    l = p.l;     % pendulum length
+    M = p.m1;    % cart mass
+    m = p.m2;    % pole mass
+    g = p.g;     % gravity 
+    
+    % initialize
+    dz = zeros(4,1);
+
+    % z' = f(z,u)
+    delta = m*sin(z(2))^2 + M;
+	dz(1) = z(3);
+	dz(2) = z(4);
+	dz(3) = m*l*(z(4)^2)*sin(z(2))/delta + m*l*g*sin(z(2))*cos(z(2))/delta/l + u/delta;
+	dz(4) = -m*(z(4)^2)*sin(z(2))*cos(z(2))/delta - (m+M)*g*sin(z(2))/delta/l - u*cos(z(2))/delta/l;
 end

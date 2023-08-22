@@ -1,41 +1,45 @@
-function u = control(t,z,p,c,u_o)
-
-    % This function represents the control law that computes the input
-    % based on full state feedback
-    %
+% This function represents the control law that computes the input
+% based on full state feedback
+function u = control(t,z,p,c)
+    
     % INPUTS:
+    %   t = simulation time
     %   z = [x;q;dx;dq] = state of the system
-    %   p = physical parameter struct
-    %       .g = gravity
+    %   p = parameter struct
+    %       .l  = pendulum length
     %       .m1 = cart mass
-    %       .m2 = pole mass
-    %       .l = pendulum length
-    %   c = control parameter struct 
-    %       .K = control gains from LQR
-    %       .S = cost to go from algebraic Riccati equation
-    %       .zt = target state (time variant)
-    %
+    %       .m2 = pendulum mass
+    %       .g  = gravity
+    %       .L  = rail length
+    %       .s  = max input force (motor torque*radius)
+    %       .l_un  = pendulum length with uncertainty
+    %       .m1_un = cart mass with uncertainty
+    %       .m2_un = pendulum mass with uncertainty
+    %   c = control parameter struct
+    %       .N = number of sample points
+    %       .dt = sample time step size
+    %       .Q = error cost
+    %       .R = actuation effort  
+    %       .K = optimal feedback gain
+    %       .S = cost-to-go
+    %       .options = options for NLP solver
+    % 
     % OUTPUTS:
     %   u = u(t,z) = input as function of time and state feedback
-
-    % unpack physical and test parameters
-    l = p.l;  % Pendulum length
-    M = p.m1; % Cart mass
-    m = p.m2; % Pole mass
-    g = p.g;  % Gravity acceleration
-    zt = p.zt(t);
-
-    % unpack the control parameters
+    
+    % unpack parameters
     S = c.S;
     K = c.K;
     dt = c.dt;
+    u_o = c.u_o;
+    zt = p.zt(t);
 
     % stablize about inverted equilibrium
     % cost-to-go from algebraic Ricatti eqn as a metric of closeness
     if (z-zt)'*S*(z-zt) < 1.0
         u = -K*(z-zt);
     
-    % interpolate from D.C. if far away from equilibrium
+    % interpolate OCP result if far away from equilibrium
     else
         % find proper i to sample from
         i = ceil(t/dt);

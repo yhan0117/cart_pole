@@ -1,10 +1,12 @@
+% Cart pole swing up with open loop trajectory optimization
 clear;clear global;clc;close all
 
 trial = 1;
 record = 0; 
 path = pwd;
+
 %% Test Case Parameters
-load("../Test Cases/trial1.mat")
+load("../Test Cases/trial" + trial + ".mat")
 
 %% Controls <-- only section to modify amongst different control methods
 % Discretization Constants
@@ -32,8 +34,9 @@ u = @(t,z)control(t,z,p,c);
 %% Simulation
 disp("Producing simulation")
 options = odeset('RelTol',1e-8,'AbsTol',1e-8);
-[~, z] = ode45(@(t,z)cartPoleDynamics(z,u(t,z),p), r.t_s, p.z0, options);
-z = z';
+[~, z] = ode45(@(t,z)cartPoleDynamics(t,z,u,p), r.t_s, p.z0, options);
+u = z(:,5);
+z = z(:,1:4)';
 
 %% Save data
 if record
