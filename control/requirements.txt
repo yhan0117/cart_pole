@@ -1,0 +1,6 @@
+serial
+numpy
+scipy
+yaml
+struct
+logging
