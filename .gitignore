@@ -8,3 +8,5 @@
 **/data/
 *.asv
 */Comparison/
+**/venv/
+**/__pycache__/

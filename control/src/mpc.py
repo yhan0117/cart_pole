@@ -2,26 +2,8 @@ import numpy as np
 from scipy.optimize import minimize
 from collections import namedtuple
 
-
-# ---------------------------- pid control ----------------------------
-def pid(z,K,zr):
-    # two controller stages
-    # match
-        # case swing up
-            # Lyapunov based
-
-        # case near top
-            # calculate error z - r
-            # calculate feedback u = -K*e
-            # saturation
-    
-    u = -np.sum(np.multiply(z-zr,K))
-    # return u
-    return u
-
-# ---------------------------- model-predictive control ----------------------------
 # scalar trajectory cost function for OCP
-def trajCost(dv,p):
+def trajCost(dv,p):     
     # unpack parameters 
     zd = p.zd   # desired state 
     T = p.T     # terminal cost
@@ -113,11 +95,5 @@ def mpc(z,p,dv0):
     # SQP approach to trajectory optimization 
     res = scipy.optimize.minimize(partial(trajCost, p=p), dv0, method='SLSQP', constraints=[eq_cons, None], options={'ftol': 1e-9, 'disp': True}, bounds=bounds)
 
-# ---------------------------- main ----------------------------
-if __name__ == "__main__":
-    z = np.arange(4)
-    dv = np.arange(50)
-    Params = namedtuple('Params', ['N', 'dt', 'l', 'mp', 'mc', 'g'])
-    p = Params(10,0.1,1,1,1,1)
-
-    print(np.append([[dv[0]-z[0]],[dv[1]-z[1]],[dv[2]-z[2]],[dv[3]-z[3]]], collcationConstraints(dv,p)))
+def tes():
+    return 1

@@ -1,6 +1,7 @@
-serial
 numpy
 scipy
-yaml
-struct
+pyserial
+pyyaml
 logging
+nose
+sphinx

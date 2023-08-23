@@ -1,17 +1,21 @@
-# .PHONY: run clean
+.PHONY: run clean test
 VENV = venv
-PYTHON = $(VENV)/bin/python3
-PIP = $(VENV)/bin/pip
+PYTHON = ./$(VENV)/Scripts/python
 
-run: $(VENV)/bin/activate
+run: $(VENV)/Scripts/activate
 	$(PYTHON) src/serial_interface.py
 
 
-$(VENV)/bin/activate: requirements.txt
-	python3 -m venv $(VENV)
-	$(PIP) install -r requirements.txt
+$(VENV)/Scripts/activate: requirements.txt
+	python -m venv $(VENV) --upgrade-deps
+	$(PYTHON) -m pip install -r requirements.txt
+	$(PYTHON) -m pip list
 
 
 clean:
 	rm -rf __pycache__
 	rm -rf $(VENV)
+
+
+test: $(VENV)/Scripts/activate
+	$(PYTHON) tests/test.py -v
