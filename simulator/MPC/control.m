@@ -35,7 +35,7 @@ function [dv_o,output] = control(t,z,p,c,opt)
     global dv_prev
     dv0 = dv_prev;   % 5 x N
     
-    %%%% boundary constraints
+    % boundary constraints
     lb = -inf(5*N,1);
     ub = inf(5*N,1);
 
@@ -52,7 +52,7 @@ function [dv_o,output] = control(t,z,p,c,opt)
     Aeq(1:4, 1:4) = eye(4);
     beq = z0;
     
-    %%%% SQP approach of trajctory optimization 
+    %%%% SQP approach of trajectory optimization 
     % nonlincon is appended to Lagrangian as part of objective function 
     % => may not be satisfied 
     % => add weight (which indirectly adds to cost) to make more siginificant

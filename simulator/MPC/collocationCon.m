@@ -36,7 +36,7 @@ function [c, ceq, dc, dceq] = collocationCon(dv,p,c)
     ceq = zeros(4*(N-1), 1);
     dceq = zeros(4*(N-1), 5*N);
 
-    %%%% compute collocation constraint feasibility (part of Lagrangian with sqp) at each timestep
+    % compute collocation constraint feasibility (part of Lagrangian with sqp) at each timestep
     for i=1:(N-1)
         % extarct from dv states and control at each interval
         z1 = dv(4*i-3:4*i);
@@ -100,7 +100,7 @@ end
 % Equations of motion to plug in Runge Kutta solver
 function dz = eom(z,u,p)
     
-    % unpack parameters (uncertainty included)
+    % unpack parameters
     l = p.l;     % pendulum length
     M = p.m1;    % cart mass
     m = p.m2;    % pole mass
