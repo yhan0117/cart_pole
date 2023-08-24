@@ -10,15 +10,13 @@ def trajCost(dv,p):
     Q = p.Q     # error cost matrix
     R = p.R     # actuation effort cost matrix
     N = p.N     # control horizon 
-
     # extract from decision variables
     z = np.array([dv[4*i:4*(i+1)] for i in range(N)])
-    u = dv[4*N+1:]
-
+    u = dv[4*N:]
     # error 
-    e = z - zt
+    e = z - zd
     # cost in QR form
-    JQ = sum([e[:,i]@Q@e[:,i]*T[i] for i in range(N)])
+    JQ = sum([Q@(e[i,:]**2)*T[i] for i in range(N)])
     JR = R*(u@u)
     # total cost
     J = JQ+JR
@@ -76,10 +74,20 @@ def mpc(z,p,dv0):
     dv0 = initial guess of (d)ecision (v)ariables (result from last control loop), 5N x 1 
     '''   
     from functools import partial
-    # equality constraint on initial state
-    eq_cons = { 'type': 'eq',
-                'fun' : lambda dv: np.append([[dv[0]-z[0]],[dv[1]-z[1]],[dv[2]-z[2]],[dv[3]-z[3]]], collcationConstraints(dv,p),axis=0)}
-    # 'jac' : lambda dv: np.append(np.eye(4), np.zeros((4,5*p.N-4)), axis=1)
+
+    # unpack parameters
+    N = p.N
+    Q = p.Q
+    R = p.R
+    T = p.T
+    
+    # constraints
+    eq_cons = { 'type': 'eq',   # initial state + collocation constraints
+                'fun' : lambda dv: np.append([dv[0]-z[0],dv[1]-z[1],dv[2]-z[2],dv[3]-z[3]], collcationConstraints(dv,p))}
+              # 'jac' : lambda dv: np.append(np.eye(4), np.zeros((4,5*p.N-4)), axis=1)
+    ineq_cons = {   'type': 'ineq',   # no inequality constraints
+                    'fun' : lambda dv: [1],
+                    'jac' : lambda dv: np.zeros(dv.shape)}
 
     # decision variable bounds
     lb = np.full((5*N, 1), -np.inf)
@@ -90,10 +98,13 @@ def mpc(z,p,dv0):
     # motor saturation
     lb[4*N+1:] = -p.s
     ub[4*N+1:] = p.s
-    bounds = tuple(tuple(pair) for pair in np.append(lb,ub,axis=1))
+    bounds = tuple(tuple(pair) for pair in np.append(lb,ub,axis=1)) # cast bounds into a tuple
+    
+    # analytical Jacobian and Hessian to improve computation speed
+    jac = lambda dv: 2*np.append(np.tile(Q, N)*np.repeat(T,4),np.tile(R, N))*dv
+    hess = lambda dv: np.diag(2*np.append(np.tile(np.diag(Q), N)*np.repeat(T,4),np.tile(R, N)))
 
     # SQP approach to trajectory optimization 
-    res = scipy.optimize.minimize(partial(trajCost, p=p), dv0, method='SLSQP', constraints=[eq_cons, None], options={'ftol': 1e-9, 'disp': True}, bounds=bounds)
-
-def tes():
-    return 1
+    res = minimize(partial(trajCost, p=p), dv0, method='SLSQP', constraints=[eq_cons, ineq_cons], options={'ftol': 1e-6, 'disp': True}, bounds=bounds)
+    # res = minimize(partial(trajCost, p=p), dv0, method='trust-constr',  constraints=[eq_cons, ineq_cons], options={'disp': False}, bounds=bounds)
+    return res

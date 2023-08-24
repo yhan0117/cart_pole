@@ -5,3 +5,4 @@ pyyaml
 logging
 nose
 sphinx
+gymnasium
