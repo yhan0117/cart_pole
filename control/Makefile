@@ -10,8 +10,9 @@ run: $(VENV)/Scripts/activate
 $(VENV)/Scripts/activate: requirements.txt
 ifeq ('$(PYTHON_VER)','')		
 	python -m venv $(VENV) --upgrade-deps
+	$(PYTHON) -m pip install logging
 else
-	python3 -m venv $(VENV)
+	python3 -m venv $(VENV) 
 	$(eval PYTHON=./$(VENV)/bin/python3)
 endif
 	$(PYTHON) -m pip install -r requirements.txt

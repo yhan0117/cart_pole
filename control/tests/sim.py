@@ -8,7 +8,7 @@ from gymEnv.cartpole import CartPoleEnv
 from gymnasium.wrappers import RecordVideo
 
 # params
-N = 60
+N = 2
 dt = 1.5/N
 T = np.ones(N)
 T[-1] = 110
