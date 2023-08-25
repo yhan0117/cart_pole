@@ -105,6 +105,6 @@ def mpc(z,p,dv0):
     hess = lambda dv: np.diag(2*np.append(np.tile(np.diag(Q), N)*np.repeat(T,4),np.tile(R, N)))
 
     # SQP approach to trajectory optimization 
-    res = minimize(partial(trajCost, p=p), dv0, method='SLSQP', constraints=[eq_cons, ineq_cons], options={'ftol': 1e-6, 'disp': True}, bounds=bounds)
+    res = minimize(partial(trajCost, p=p), dv0, method='SLSQP', constraints=[eq_cons, ineq_cons], options={'ftol': 1e-7, 'disp': False}, bounds=bounds)
     # res = minimize(partial(trajCost, p=p), dv0, method='trust-constr',  constraints=[eq_cons, ineq_cons], options={'disp': False}, bounds=bounds)
     return res

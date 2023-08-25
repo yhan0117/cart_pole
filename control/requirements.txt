@@ -6,3 +6,5 @@ logging
 nose
 sphinx
 gymnasium
+gymnasium[classic-control]
+moviepy

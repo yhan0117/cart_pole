@@ -9,7 +9,6 @@ run: $(VENV)/Scripts/activate
 $(VENV)/Scripts/activate: requirements.txt
 	python -m venv $(VENV) --upgrade-deps
 	$(PYTHON) -m pip install -r requirements.txt
-	$(PYTHON) -m pip list
 
 
 clean:
@@ -19,3 +18,6 @@ clean:
 
 test: $(VENV)/Scripts/activate
 	$(PYTHON) tests/test.py -v
+
+sim: $(VENV)/Scripts/activate
+	$(PYTHON) tests/sim.py
