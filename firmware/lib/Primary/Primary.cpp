@@ -21,11 +21,11 @@ void primary_begin(states* curState, IMU myIMU) {
 
   // --------------------------------------------------------------------
   // wait for user prompt to start (through Serial port)
-  digitalWrite(LED_BUILTIN, HIGH);  
-  while (Serial.read() != '1') ; 
-  Serial.write('1');
-  digitalWrite(LED_BUILTIN, LOW);  
-  while (Serial.available()) Serial.read();  // clear serial buffer
+  // digitalWrite(LED_BUILTIN, HIGH);  
+  // while (Serial.read() != '1') ; 
+  // Serial.write('1');
+  // digitalWrite(LED_BUILTIN, LOW);  
+  // while (Serial.available()) Serial.read();  // clear serial buffer
 
   // --------------------------------------------------------------------
   // prompt cart to start by sending 1 (in the register address field)
@@ -37,11 +37,11 @@ void primary_begin(states* curState, IMU myIMU) {
 
   // --------------------------------------------------------------------
   // prompt x axis board to start
-  while ((rcode = i2cRead(AXIS_ADDRESS, 1, data, 1)) || data[0] != 1) {
-    delay(1000);
-    Serial.write(rcode | (0b1 << 6));
-  } 
-  Serial.write('1');
+  // while ((rcode = i2cRead(AXIS_ADDRESS, 1, data, 1)) || data[0] != 1) {
+  //   delay(1000);
+  //   Serial.write(rcode | (0b1 << 6));
+  // } 
+  // Serial.write('1');
 
   // --------------------------------------------------------------------
   // create IMU instance and start

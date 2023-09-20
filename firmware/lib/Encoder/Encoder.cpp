@@ -34,10 +34,12 @@ Encoder::~Encoder() {
 
 // Update per loop
 void Encoder::update() {
+  noInterrupts();
   // re-enable bouncing
   this->rotating = true;
   // if idle for too long (10ms), update flag (MST of speed)
   if(micros() - this->prev_pulse > 10000) dt |= (B1 << 15);
+  interrupts();
 }
 
 // Reset dials and speed for calibration 
@@ -76,7 +78,7 @@ uint8_t EBoard::begin() {
 
   // wait for start flag to change
   digitalWrite(LED_BUILTIN, HIGH); 
-  while (mode != 1) ;
+  // while (mode != 1) ;
 
   Serial.println("Connected");
   // flash to indicate connection with main
@@ -163,14 +165,14 @@ void axisEncoderA() {
     Axis.A_state = ! Axis.A_state;
     if (Axis.A_state && !Axis.B_state) {
       Axis.pos += 1;
-      if (Axis.dt >> 15) {
-        Axis.prev_pulse = micros();
-        Axis.dt = ~(B10 << 14);  
-      } else {
-        Axis.dt = micros() - Axis.prev_pulse;
-        Axis.dt |= (B01 << 14); 
-        Axis.prev_pulse = micros();
-      }      
+      // if (Axis.dt >> 15) {
+      //   Axis.prev_pulse = micros();
+      //   Axis.dt = ~(B10 << 14);  
+      // } else {
+      //   Axis.dt = micros() - Axis.prev_pulse;
+      //   Axis.dt |= (B01 << 14); 
+      //   Axis.prev_pulse = micros();
+      // }      
     }
     Axis.rotating = false; 
   }
@@ -184,14 +186,14 @@ void axisEncoderB() {
     Axis.B_state = !Axis.B_state;
     if (Axis.B_state && !Axis.A_state) {
       Axis.pos -= 1;
-      if (Axis.dt >> 15) {
-        Axis.prev_pulse = micros();
-        Axis.dt = ~(B11 << 14);  
-      } else {
-        Axis.dt = micros() - Axis.prev_pulse;
-        Axis.dt &= ~(B11 << 14);
-        Axis.prev_pulse = micros();
-      }
+      // if (Axis.dt >> 15) {
+      //   Axis.prev_pulse = micros();
+      //   Axis.dt = ~(B11 << 14);  
+      // } else {
+      //   Axis.dt = micros() - Axis.prev_pulse;
+      //   Axis.dt &= ~(B11 << 14);
+      //   Axis.prev_pulse = micros();
+      // }
     }
     Axis.rotating = false;
   }
@@ -218,12 +220,12 @@ void cartRequestEvent() {
   uint8_t data[2];
 
   switch ((int)Cart.mode) {
-    case 1:   // send start signal to primary and switch to regular mode
+    case 1: { // send start signal to primary and switch to regular mode
       Wire.write(1); // send 1 to primary to indicate start
       Cart.mode = 0; 
       break; 
-    case 2:   // send position data
-    {
+    }
+    case 2: { // send position data
       Wire.write(2); // send 2 to primary to indicate successful read
       uint16_t pos = Cart.read(1);
       data[0] = (uint8_t) pos & 0xFF;
@@ -232,8 +234,7 @@ void cartRequestEvent() {
       Cart.mode = 0;
       break; 
     }
-    case 3:
-    {   // send speed data
+    case 3: { // send speed data
       Wire.write(3); // send 3 to primary to indicate successful read
       uint16_t dt = Cart.read(0);
       data[0] = (uint8_t) dt & 0xFF;
@@ -242,17 +243,17 @@ void cartRequestEvent() {
       Cart.mode = 0;
       break; 
     }
-    case 4:   // reset
+    case 4: { // reset
       Cart.reset();
       Wire.write(4);
       break;
-    case 5:
+    }
+    case 5: { 
       Wire.write(5);
       void(* resetFunc)(void) = 0;
       resetFunc();
       break;
-    default:
-      break;  
+    }
   }
   return;
 }
@@ -302,8 +303,6 @@ void axisRequestEvent() {
       void(* resetFunc)(void) = 0;
       resetFunc();
       break;
-    default:
-      break;  
   }
   return;
 }

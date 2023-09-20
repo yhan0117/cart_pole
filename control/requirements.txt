@@ -4,6 +4,8 @@ pyserial
 pyyaml
 nose
 sphinx
+casadi
+do-mpc
 gymnasium
 gymnasium[classic-control]
 moviepy

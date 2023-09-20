@@ -9,8 +9,9 @@ using namespace constants;
   test calibiration
 */
 // #define CART 1
-// #define AXIS 1
-#define PMRY 1 
+#define AXIS 1
+// #define PMRY 1 
+// #define TEST 1
 
 #ifdef CART
   #include "Encoder.h"
@@ -22,10 +23,12 @@ using namespace constants;
   #include "Primary.h"
   states curState;
   IMU myIMU;
+#elif TEST
+  #include "Test.cpp"
 #endif
 
 void setup() {
-  // Serial.begin(115200); // debugging use
+  Serial.begin(115200); // debugging use
   Wire.setClock(400000UL); // Set I2C frequency to 400kHz
 
   // built-in LED for debug
@@ -38,22 +41,25 @@ void setup() {
     Axis.begin();
   #elif PMRY // primary board reponsible for motor control and communication with computer 
     primary_begin(&curState, myIMU);
+  #elif TEST
+    estart();
   #endif
 }
-// reset function
-// void(* resetFunc)(void) = 0; // declare reset function @ address 0
 
 void loop() {
 	#ifdef CART 
     Cart.update();
 	#elif AXIS   
 		Axis.update();
+    Serial.println(Axis.pos);
 	#elif PMRY
-    if(Serial.available()) serial_receive(curState);
-    imu_update(&curState, &myIMU);
-    if(Serial.available()) serial_receive(curState);
-    // cart_update(&curState);
-    if(Serial.available()) serial_receive(curState);
+    // if(Serial.available()) serial_receive(curState);
+    // // imu_update(&curState, &myIMU);
+    // if(Serial.available()) serial_receive(curState);
+    // // cart_update(&curState);
+    // if(Serial.available()) serial_receive(curState);
     // axis_update(&curState);
+  #elif TEST
+    update();
 	#endif
 }

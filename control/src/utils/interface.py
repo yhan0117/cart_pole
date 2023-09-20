@@ -82,10 +82,11 @@ def read_state(serialInst, error, timeout):
         logging.warn("Recieved invalid data")
         return -1
 
+    print(data[4:6])
     # convert cart encoder feedback (sec/tick -> rad/sec)
     dir = (omega >> 14) & 0b01
     idle = omega >> 15
-    omega = 0 if idle else (600/np.pi)/((omega & ~(0b11 << 14)) if dir else (-omega & ~(0b11 << 14)))
+    # omega = 0 if idle else (600/np.pi)/((omega & ~(0b11 << 14)) if dir else (-omega & ~(0b11 << 14)))
   
     # complementary/ Kalman filter to fuse IMU and encoder 
     # compAngleX = 0.93 * (compAngleX + gyroXrate * dt) + 0.07 * roll; // Calculate the angle using a Complimentary filter
@@ -93,8 +94,11 @@ def read_state(serialInst, error, timeout):
     # process x axis encoder
     dir = (dx >> 14) & 0b01
     idle = dx >> 15
-    dx = 0 if idle else (600/np.pi)/((dx & ~(0b11 << 14)) if dir else (-dx & ~(0b11 << 14)))
-  
+    try:
+        dx = 0 if idle else (600/np.pi)/((dx & ~(0b11 << 14)) if dir else (-dx & ~(0b11 << 14)))
+    except:
+        dx = -1
+
     # filter x encoder data by applying filter with motor output
     # => get x and dx
     
@@ -193,10 +197,11 @@ if __name__ == "__main__":
             start = time.time()
             # get feedback
             z = read_state(serialInst, dict_['error'], dict_['timeout'])
-            # control logic
-            u = pid(z,K,zr)
-            # actuate
-            cmd_motor(serialInst, u)
+            print(z)
+            # # control logic
+            # u = pid(z,K,zr)
+            # # actuate
+            # cmd_motor(serialInst, u)
             # regulate loop rate
             if time.time() - start > 1/looprate: 
                 logging.warning("Experiencing long latency")

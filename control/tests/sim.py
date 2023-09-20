@@ -6,6 +6,10 @@ from src import mpc
 import time
 from gymEnv.cartpole import CartPoleEnv
 from gymnasium.wrappers import RecordVideo
+from do_mpc import Optimizer
+# prepare opt solver? 
+solver = Optimizer()
+solver.compile_nlp
 
 # params
 N = 2

@@ -69,10 +69,13 @@ def collcationConstraints(dv,p):
     return ceq
 
 def mpc(z,p,dv0): 
-    '''
+    """ Implicit control law 
+    Two options:
+    1. scipy.optimize => slow and intepreted
+    2. casadi => can be compiled into c code, faster
     z = [x;q;dx;dq] = state of the system, 4 x 1
     dv0 = initial guess of (d)ecision (v)ariables (result from last control loop), 5N x 1 
-    '''   
+    """ 
     from functools import partial
 
     # unpack parameters
@@ -108,3 +111,5 @@ def mpc(z,p,dv0):
     res = minimize(partial(trajCost, p=p), dv0, method='SLSQP', constraints=[eq_cons, ineq_cons], options={'ftol': 1e-7, 'disp': False}, bounds=bounds)
     # res = minimize(partial(trajCost, p=p), dv0, method='trust-constr',  constraints=[eq_cons, ineq_cons], options={'disp': False}, bounds=bounds)
     return res
+
+def mpc(z,p,dv0): 

@@ -9,7 +9,7 @@
         const uint8_t AXIS_ADDRESS = 0x09;  // I2C address of X axis board
         const uint8_t IMU_ADDRESS = 0x68;   // I2C address of IMU
         const int SENSOR_TIMEOUT = 2000;    // timeout to wait for sensor input
-        const int DEBOUNCE_SPAN = 800;      // wait time for debounce to end, microseconds
+        const int DEBOUNCE_SPAN = 1000;      // wait time for debounce to end, microseconds
         
         // encoder pins
         const int CART_A = 2;      // Encoder pin A for cart
